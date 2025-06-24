@@ -1,0 +1,195 @@
+# =============================================================================
+# MICROSERVICIO DE USUARIOS Y AUTENTICACION - SISTEMA JASS DIGITAL
+# =============================================================================
+
+spring:
+     profiles:
+          active: ${SPRING_PROFILES_ACTIVE:dev}
+     application:
+          name: ${NOMBRE_MICROSERVICIO:vg-ms-users-authentication}
+
+     data:
+          mongodb:
+               uri: mongodb+srv://${MONGO_USERNAME:sistemajass}:${MONGO_PASSWORD:ZC7O1Ok40SwkfEje}@sistemajass.jn6cpoz.mongodb.net/${MONGO_DATABASE:JASS_DIGITAL}?retryWrites=true&w=majority
+               database: ${MONGO_DATABASE:JASS_DIGITAL}
+               auto-index-creation: true
+
+     web:
+          resources:
+               cache:
+                    period: 0
+          # webflux:
+          # base-path: /api/v1
+
+
+# =============================================================================
+# CONFIGURACIÓN DEL SERVIDOR
+# =============================================================================
+server:
+     port: ${SERVER_PORT:8080}
+     servlet:
+          context-path: /
+cors:
+     allowed-origins:
+          - http://localhost:4200
+          - http://localhost:3000
+          - https://localhost:4200
+          - https://localhost:3000
+     allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD
+     allowed-headers: "*"
+     allow-credentials: true
+     max-age: 3600
+# =============================================================================
+# INFORMACIÓN DE LA APLICACIÓN
+# =============================================================================
+app:
+     name: Microservicio de Usuarios y Autenticación
+     description: Microservicio para gestión de Usuarios y Autenticación del Sistema JASS Digital
+     version: 2.0.0
+     organization: Valle Grande
+
+# =============================================================================
+# CONFIGURACIÓN JWT
+# =============================================================================
+jwt:
+     secret: ${JWT_SECRET:mySecretKeyForJASSDigitalSystemUsersAuthenticationMicroservice2024}
+     expiration: ${JWT_EXPIRATION:86400000}
+     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+     issuer: ${JWT_ISSUER:JASS-Digital-System}
+
+# =============================================================================
+# CONFIGURACIÓN DE SEGURIDAD
+# =============================================================================
+security:
+     password:
+          min-length: 8
+          require-uppercase: true
+          require-lowercase: true
+          require-numbers: true
+          require-special-chars: false
+
+     login:
+          max-attempts: 5
+          lockout-duration: 300000
+
+# =============================================================================
+# CONFIGURACIÓN DE CLIENTES EXTERNOS (OTROS MICROSERVICIOS)
+# =============================================================================
+microservices:
+     organization:
+          name: ms-organizaciones
+          url: ${MS_ORGANIZACIONES_URL:http://localhost:8081}
+          timeout: 5000
+
+     infrastructure:
+          name: ms-infraestructura
+          url: ${MS_INFRAESTRUCTURA_URL:http://localhost:8082}
+          timeout: 5000
+
+# =============================================================================
+# CONFIGURACIÓN DE DOCUMENTACIÓN (OpenAPI/Swagger)
+# =============================================================================
+springdoc:
+     api-docs:
+          path: /v3/api-docs
+          enabled: true
+
+     swagger-ui:
+          path: /swagger-ui/index.html
+          try-it-out-enabled: true
+          operations-sorter: method
+          tags-sorter: alpha
+          display-request-duration: true
+
+     show-actuator: false
+
+     info:
+          title: ${app.name}
+          description: ${app.description}
+          version: ${app.version}
+          contact:
+               name: ${app.contact.name}
+
+# =============================================================================
+# CONFIGURACIÓN DE ACTUATOR (MONITOREO)
+# =============================================================================
+management:
+     endpoints:
+          web:
+               exposure:
+                    include: health,info,metrics,env
+               base-path: /actuator
+
+     endpoint:
+          health:
+               show-details: when-authorized
+               show-components: always
+
+     info:
+          env:
+               enabled: true
+          git:
+               mode: full
+
+# =============================================================================
+# CONFIGURACIÓN DE LOGGING
+# =============================================================================
+logging:
+     level:
+          root: INFO
+          pe.edu.vallegrande: DEBUG
+          org.springframework.data.mongodb: DEBUG
+          org.springframework.security: DEBUG
+          reactor.netty: INFO
+
+     pattern:
+          console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+          file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+     file:
+          name: logs/users-authentication.log
+          max-size: 10MB
+          max-history: 10
+
+# =============================================================================
+# CONFIGURACIÓN DE VALIDACIÓN
+# =============================================================================
+validation:
+     user:
+          code:
+               prefix: USR
+               length: 7
+          document:
+               dni-length: 8
+               passport-min-length: 6
+               passport-max-length: 12
+
+# =============================================================================
+# CONFIGURACIÓN ESPECÍFICA POR AMBIENTE
+# =============================================================================
+---
+spring:
+     config:
+          activate:
+               on-profile: dev
+
+logging:
+     level:
+          pe.edu.vallegrande: DEBUG
+          org.springframework.data.mongodb: DEBUG
+
+---
+spring:
+     config:
+          activate:
+               on-profile: prod
+
+logging:
+     level:
+          root: WARN
+          pe.edu.vallegrande: INFO
+
+server:
+     error:
+          include-stacktrace: never
+          include-message: never
